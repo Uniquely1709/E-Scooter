@@ -9,6 +9,10 @@
 #pragma region VARS & Definitions
 
 /*
+  initialize all MCPS
+*/
+Adafruit_MCP23X17 mcp1; 
+/*
   Define all pins used for Remote and Motor Control
  */
 #define CH1 3 //Channels for remote
@@ -16,6 +20,19 @@
 #define CH3 6
 #define CH4 9
 #define pwmPin 10 //PWM for hacked motor driver
+
+/*
+  Define Lights MCP1
+ */
+#define FrontLights 7 
+#define IndicatorLeft 6
+#define IndicatorRight 5
+
+/*
+  Controlpanel 
+ */
+#define SwitchAcc22 8
+
 
 /*
   Storages 
@@ -96,6 +113,13 @@ void setup(){
   // Set up serial monitor
   Serial.begin(115200);
 
+  // Start MCP 1
+  mcp1.begin_I2C(0x20);      
+  mcp1.pinMode(FrontLights, OUTPUT); 
+  mcp1.pinMode(SwitchAcc22, INPUT); 
+
+  mcp1.digitalWrite(FrontLights, LOW); 
+
   // Set all pins as inputs for Remote
   pinMode(CH1, INPUT);
   pinMode(CH2, INPUT);
@@ -104,6 +128,8 @@ void setup(){
 
   // Set pin for PWM Motor control
   pinMode(pwmPin, OUTPUT);
+
+    
 
 }
 
@@ -139,6 +165,15 @@ void loop() {
   if (ActualSpeed >= 0) {
     writeSpeedToMotor(ActualSpeed);
     //displaySpeed(ch3Value, multi);
+  }
+
+  Serial.println(mcp1.digitalRead(SwitchAcc22));
+
+  // Check for lights
+  if (ch3Button == 1){
+    mcp1.digitalWrite(FrontLights, HIGH);
+  }else {
+    mcp1.digitalWrite(FrontLights, LOW);
   }
 
   LastActualSpeed = ActualSpeed; 
